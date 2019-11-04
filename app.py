@@ -1,9 +1,16 @@
 from flask import Flask,render_template,url_for,request,redirect
+from flask_restful import Resource,Api
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
+api = Api(app)
+
+class HelloWorld(Resource):
+    def get(self):
+        return {"Hello " : " World"}
+api.add_resource(HelloWorld, '/hello_world')
 
 class ToDo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
