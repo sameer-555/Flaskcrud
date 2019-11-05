@@ -1,16 +1,13 @@
 from flask import Flask,render_template,url_for,request,redirect
-from flask_restful import Resource,Api
+from flask_restful import Resource,Api,reqparse
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import json
+import sqlite3
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 api = Api(app)
-
-class HelloWorld(Resource):
-    def get(self):
-        return {"Hello " : " World"}
-api.add_resource(HelloWorld, '/hello_world')
 
 class ToDo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -57,6 +54,32 @@ def update(id):
             return "there was an error while updating this task"
     else:
         return render_template('update.html',task=task)
+
+class getAPI(Resource):
+    def get(self):
+        conn = sqlite3.connect('test.db')
+        c = conn.cursor()
+        data = c.execute("select * from to_do")
+        c.close
+        return print(type(args))
+
+api.add_resource(getAPI, '/hello_world')
+
+class postAPI(Resource):
+    def get(self):
+        conn = sqlite3.connect('test.db')
+        c = conn.cursor()
+        data = c.execute("select * from to_do")
+        c.close
+        return data.fetchall()
+    def post(self):
+        conn = sqlite3.connect('test.db')
+        c = conn.cursor()
+        args = reqparse.RequestParser()
+        c.execute("""INSERT INTO to_do ('content','completed','date_created') VALUES((?),(?),(?))""",[args['task'],0,datetime.now()])
+        conn.commit()
+        
+api.add_resource(postAPI,'/postAPI')   
 
 if __name__ == "__main__":
     app.run(debug=True) 
