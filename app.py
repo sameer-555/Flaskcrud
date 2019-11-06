@@ -9,6 +9,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 api = Api(app)
 
+
 class ToDo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(200), nullable = False )
@@ -61,9 +62,9 @@ class getAPI(Resource):
         c = conn.cursor()
         data = c.execute("select * from to_do")
         c.close
-        return print(type(args))
+        return data.fetchall()
 
-api.add_resource(getAPI, '/hello_world')
+api.add_resource(getAPI, '/getAPI')
 
 class postAPI(Resource):
     def get(self):
@@ -75,7 +76,9 @@ class postAPI(Resource):
     def post(self):
         conn = sqlite3.connect('test.db')
         c = conn.cursor()
-        args = reqparse.RequestParser()
+        parser = reqparse.RequestParser()
+        parser.add_argument('task')
+        args = parser.parse_args()
         c.execute("""INSERT INTO to_do ('content','completed','date_created') VALUES((?),(?),(?))""",[args['task'],0,datetime.now()])
         conn.commit()
         
