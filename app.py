@@ -56,16 +56,6 @@ def update(id):
     else:
         return render_template('update.html',task=task)
 
-class getAPI(Resource):
-    def get(self):
-        conn = sqlite3.connect('test.db')
-        c = conn.cursor()
-        data = c.execute("select * from to_do")
-        c.close
-        return data.fetchall()
-
-api.add_resource(getAPI, '/getAPI')
-
 class postAPI(Resource):
     def get(self):
         conn = sqlite3.connect('test.db')
@@ -82,7 +72,33 @@ class postAPI(Resource):
         c.execute("""INSERT INTO to_do ('content','completed','date_created') VALUES((?),(?),(?))""",[args['task'],0,datetime.now()])
         conn.commit()
         
-api.add_resource(postAPI,'/postAPI')   
+api.add_resource(postAPI,'/to_do')
+
+class idAPI(Resource):
+    def delete(self,id):
+        conn = sqlite3.connect('test.db')
+        c = conn.cursor()
+        c.execute("""Delete from to_do where id = {};""".format(id))
+        conn.commit()
+    def get(self,id):
+        conn = sqlite3.connect('test.db')
+        c = conn.cursor()
+        data = c.execute("""Select * from to_do where id = {};""".format(id))
+        conn.commit()
+        return data.fetchall()
+    def put(self,id):
+        conn = sqlite3.connect('test.db')
+        c = conn.cursor()
+        parser = reqparse.RequestParser()
+        parser.add_argument('task')
+        args = parser.parse_args()
+        print(args['task'])
+        c.execute("""UPDATE to_do SET content = '{0}' where id = {1};
+        """.format(args['task'],id))
+        conn.commit()
+        # c.execute("""UPDATE to_do SET content = {} where\
+        # id = {}""".format(args['task'],id))
+api.add_resource(idAPI,'/to_do/<int:id>')
 
 if __name__ == "__main__":
     app.run(debug=True) 
